@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mas Scanner | Next-Gen Security</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #050506;
+            --accent-red: #ff3e3e;
+            --accent-glow: rgba(255, 62, 62, 0.5);
+            --card-bg: rgba(15, 15, 18, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #94949e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255, 62, 62, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(62, 142, 255, 0.03) 0%, transparent 40%);
+        }
+
+        /* Decorative Grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .navbar {
+            padding: 30px 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-family: 'Space+Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: 4px;
+            color: #fff;
+        }
+
+        .logo span {
+            color: var(--accent-red);
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-weight: 500;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10%;
+            text-align: center;
+        }
+
+        .hero-badge {
+            background: rgba(255, 62, 62, 0.1);
+            color: var(--accent-red);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 62, 62, 0.2);
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero h1 {
+            font-family: 'Space+Grotesk', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 25px;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 20px;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .btn-primary {
+            background: var(--accent-red);
+            color: #fff;
+            padding: 16px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 10px 30px var(--accent-glow);
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            filter: brightness(1.2);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 16px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Stats Grid */
+        .stats-section {
+            padding: 100px 10%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 50px 30px;
+            border-radius: 30px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--accent-red);
+            box-shadow: 0 20px 40px rgba(255, 62, 62, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255, 62, 62, 0.03) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .stat-val {
+            font-size: 3.5rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .stat-val span {
+            color: var(--accent-red);
+            font-size: 1.5rem;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glow-cursor {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 62, 62, 0.15) 0%, transparent 70%);
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glow-cursor" id="glow"></div>
+
+    <nav class="navbar">
+        <div class="logo">CXL<span>AC</span></div>
+        <div class="nav-links">
+            <a href="#home">HOME</a>
+            <a href="#features">FEATURES</a>
+            <a href="dashboard.html">DASHBOARD</a>
+            <a href="#stats">AVAILABILITY</a>
+        </div>
+        <a href="dashboard.html" class="btn-secondary" style="padding: 10px 25px; border-radius: 8px;">LOGIN</a>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-badge">ADVANCED SYSTEM AUDITING</div>
+        <h1>Unparalleled Security <br> For Your Server.</h1>
+        <p>CXL AC provides the industry's most rigorous cheat detection and system auditing tools for
+            high-performance communities.</p>
+        <div class="cta-group">
+            <a href="dashboard.html" class="btn-primary">GET STARTED</a>
+            <a href="#stats" class="btn-secondary">VIEW STOCK</a>
+        </div>
+    </section>
+
+    <section class="stats-section" id="stats">
+        <div class="stat-card">
+            <div class="stat-val" id="stat-monthly">30<span>PCS</span></div>
+            <div class="stat-label">1 Month Access</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(255, 62, 62, 0.3);">
+            <div class="stat-val" id="stat-lifetime" style="color: var(--accent-red);">90<span>PCS</span></div>
+            <div class="stat-label">Lifetime Access</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="stat-yearly">90<span>PCS</span></div>
+            <div class="stat-label">1 Year Access</div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const glow = document.getElementById('glow');
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        async function updateStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('stat-lifetime').innerHTML = `${data.lifetime}<span>PCS</span>`;
+                document.getElementById('stat-monthly').innerHTML = `${data.monthly}<span>PCS</span>`;
+                document.getElementById('stat-yearly').innerHTML = `${data.yearly}<span>PCS</span>`;
+            } catch (e) {
+                console.error('Stats update failed');
+            }
+        }
+
+        updateStats();
+        setInterval(updateStats, 30000);
+    </script>
+</body>
+
+</html>
