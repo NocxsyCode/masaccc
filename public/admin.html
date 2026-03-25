@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CXL AC | Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root {
+            --bg-dark: #050506;
+            --sidebar-bg: #0c0c0e;
+            --card-bg: #111114;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --accent-red: #ff3e3e;
+            --accent-blue: #3e8eff;
+            --accent-green: #2ecc71;
+            --text-main: #ffffff;
+            --text-dim: #888888;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 25px;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: var(--accent-red);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 16px 20px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-dim);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 62, 62, 0.05);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            box-shadow: 0 0 20px rgba(255, 62, 62, 0.1);
+            color: var(--accent-red);
+        }
+
+        /* Main Content */
+        .main-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 60px;
+            background: radial-gradient(circle at top right, rgba(255, 62, 62, 0.03) 0%, transparent 40%);
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            margin-bottom: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(255, 62, 62, 0.2);
+        }
+
+        .stat-info h3 {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .stat-info .val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            opacity: 0.8;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+        }
+
+        td {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pin-code {
+            font-weight: 700;
+            color: #fff;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .type-badge {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-pill {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .status-cheating {
+            background: rgba(255, 62, 62, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 62, 62, 0.2);
+        }
+
+        .status-legit {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            padding: 50px;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            margin-bottom: 25px;
+            outline: none;
+        }
+
+        .create-btn {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .create-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 62, 62, 0.2);
+        }
+
+        /* Auth Overlay */
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            padding: 50px;
+            border-radius: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+        }
+
+        body.authenticated #login-overlay { display: none; }
+    </style>
+</head>
+
+<body class="">
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="font-family: 'Space Grotesk'; margin-bottom: 10px;">CXL<span>AC</span> Admin</h2>
+            <p style="color: var(--text-dim);">Enter secret access key</p>
+            <input type="password" id="admin-password">
+            <button class="create-btn" style="width: 100%;" onclick="checkAuth()">LOGIN</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="logo">CXL<span>AC</span></div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="showView('home')">
+                <i class="fas fa-chart-pie"></i> OVERVIEW
+            </li>
+            <li class="nav-item" onclick="showView('pins')">
+                <i class="fas fa-key"></i> MANAGE KEYS
+            </li>
+        </ul>
+        <button class="create-btn" onclick="openCreateModal()"><i class="fas fa-plus"></i> NEW KEY</button>
+    </div>
+
+    <div class="main-container">
+        <!-- View: Home -->
+        <div id="view-home" class="view active">
+            <div class="header">
+                <h1>Admin Overview</h1>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Total Reports</h3>
+                        <div class="val" id="stat-total">0</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>Detections</h3>
+                        <div class="val" id="stat-detections" style="color: var(--accent-red);">0</div>
+                    </div>
+                    <div class="stat-icon" style="color: var(--accent-red);"><i class="fas fa-shield-virus"></i></div>
+                </div>
+            </div>
+            <h3>Recent Activity</h3>
+            <div class="table-container" style="margin-top: 25px;">
+                <table id="logs-table">
+                    <thead>
+                        <tr>
+                            <th>KEY</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View: Pins -->
+        <div id="view-pins" class="view">
+            <div class="header">
+                <h1>Key Management</h1>
+            </div>
+            <div class="table-container">
+                <table id="pins-table">
+                    <thead>
+                        <tr>
+                            <th>KEY</th>
+                            <th>Type</th>
+                            <th>HWID</th>
+                            <th>Expiry (10h)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create Key -->
+    <div id="pin-modal" class="modal">
+        <div class="modal-content" id="create-stage">
+            <h2 style="margin-bottom: 25px;">Generate New Key</h2>
+            <select id="key-type">
+                <option value="Lifetime">Lifetime</option>
+                <option value="1 Month">1 Month</option>
+                <option value="1 Year">1 Year</option>
+            </select>
+            <button class="create-btn" style="width: 100%;" onclick="createPin()">GENERATE</button>
+            <p onclick="closeModal()" style="margin-top: 15px; cursor: pointer; color: var(--text-dim);">Cancel</p>
+        </div>
+        <div class="modal-content" id="result-stage" style="display: none;">
+            <h2 style="margin-bottom: 10px;">Key Created</h2>
+            <div id="new-pin-display" style="font-size: 2.2rem; font-weight: 800; color: var(--accent-red); margin: 30px 0;">MAK-XXXX</div>
+            <button class="create-btn" style="width: 100%;" onclick="closeModal()">DONE</button>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let logs = [];
+        let pins = [];
+
+        function checkAuth() {
+            if (document.getElementById('admin-password').value === 'CXL-ADMIN-77') {
+                sessionStorage.setItem('cxl_admin', 'true');
+                document.body.classList.add('authenticated');
+                init();
+            }
+        }
+
+        if (sessionStorage.getItem('cxl_admin')) {
+            document.body.classList.add('authenticated');
+            init();
+        }
+
+        async function init() {
+            await Promise.all([fetchLogs(), fetchPins()]);
+        }
+
+        async function fetchLogs() {
+            const res = await fetch('/api/logs');
+            logs = await res.json();
+            const tbody = document.querySelector('#logs-table tbody');
+            tbody.innerHTML = '';
+            logs.slice(0, 10).forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${log.pin}</td><td><span class="status-pill status-${log.status.toLowerCase()}">${log.status}</span></td><td>${new Date(log.timestamp).toLocaleTimeString()}</td>`;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('stat-total').textContent = logs.length;
+            document.getElementById('stat-detections').textContent = logs.filter(l => l.status === 'Cheating').length;
+        }
+
+        async function fetchPins() {
+            const res = await fetch('/api/pins');
+            pins = await res.json();
+            const tbody = document.querySelector('#pins-table tbody');
+            tbody.innerHTML = '';
+            pins.forEach(pin => {
+                const tr = document.createElement('tr');
+                const expiryText = pin.expiresAt ? new Date(pin.expiresAt).toLocaleString() : 'N/A';
+                tr.innerHTML = `<td class="pin-code">${pin.pin}</td><td>${pin.type}</td><td style="font-size: 0.8rem; color: var(--text-dim);">${pin.hwid || 'UNBOUND'}</td><td>${expiryText}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openCreateModal() { document.getElementById('pin-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('pin-modal').style.display = 'none'; }
+
+        async function createPin() {
+            const type = document.getElementById('key-type').value;
+            const res = await fetch('/api/create-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type })
+            });
+            const data = await res.json();
+            document.getElementById('new-pin-display').textContent = data.pin;
+            document.getElementById('create-stage').style.display = 'none';
+            document.getElementById('result-stage').style.display = 'block';
+            fetchPins();
+        }
+
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        socket.on('new-log', log => fetchLogs());
+    </script>
+</body>
+</html>
