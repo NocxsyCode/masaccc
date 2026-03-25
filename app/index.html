@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CXL AC TOOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0c0c0e;
+            --accent-color: #ff3e3e;
+            --text-color: #ffffff;
+            --text-dim: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-card {
+            width: 700px;
+            height: 500px;
+            background: rgba(15, 15, 18, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+        }
+
+        .window-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        /* Splash Screen */
+        .splash {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            animation: fadeOut 1s ease 4s forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        .logo-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(255, 62, 62, 0.3));
+        }
+
+        .logo-text span { color: var(--accent-color); }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 10px;
+            animation: fillBar 3s ease-in-out 0.5s forwards;
+        }
+
+        @keyframes fillBar {
+            0% { width: 0%; }
+            50% { width: 60%; }
+            100% { width: 100%; }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* App Content */
+        .content {
+            padding: 40px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .key-input-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.8s ease-out 4.2s forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input {
+            width: 100%;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .scan-status {
+            display: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .scan-line {
+            padding: 5px 0;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .scan-line span {
+            color: #fff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .progress-circle-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        svg {
+            width: 150px;
+            height: 150px;
+            transform: rotate(-90deg);
+        }
+
+        circle {
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .toast {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #ff3e3e;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(255, 62, 62, 0.4);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="toast-msg">NO AUTH KEY</span>
+    </div>
+    <div class="main-card">
+        <div class="window-controls">
+            <span class="close-btn" id="close-app">✕</span>
+        </div>
+
+        <div class="splash" id="splash">
+            <div class="logo-text">CXL <span>AC</span></div>
+            <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+            </div>
+            <div class="loading-text">Initializing security modules...</div>
+        </div>
+
+        <div class="content">
+            <div id="setup-view" class="key-input-container">
+                <h2 style="margin-bottom: 30px; letter-spacing: 2px;">AUTHENTICATION</h2>
+                <input type="text" id="pin-input" placeholder="XXX-XXX" maxlength="7">
+                <button class="btn" onclick="startScan()">AUTHENTICATE</button>
+            </div>
+
+            <div id="scan-view" class="scan-status">
+                <div class="progress-circle-container">
+                    <svg>
+                        <circle cx="75" cy="75" r="70" id="progress-circle"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: 700;" id="progress-text">0%</div>
+                </div>
+                <div id="status-text" style="text-align: center; margin-bottom: 20px; font-weight: 600; color: var(--accent-color); text-transform: uppercase;">System setup...</div>
+                <div id="scan-log" style="height: 100px; overflow: hidden; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;">
+                    <!-- Real-time scan logs -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const fs = require('fs');
+        const path = require('path');
+        const axios = require('axios');
+        const { execSync } = require('child_process');
+
+        document.getElementById('close-app').addEventListener('click', () => {
+            ipcRenderer.send('close-app');
+        });
+
+        // Cheat Signatures
+        const cheatNames = [
+            'marseille.exe', 'loader_1.exe', 'gosth.exe', 'ocean (2).exe', 
+            'zpo.exe', 'teamviewer_setup_x64.exe', 'hamburger.exe', 
+            'pearl.exe', 'ibackupviewer10setup.exe', 'shawarma',
+            'TZ Project', '9z Project', 'SkriptGG', 'HX Cheats', 
+            'redEngine', '420 Cheats', 'Keyser', 'TZX External', 
+            'Eulen Cheats', 'mwbyte', 'mwfree'
+        ];
+
+        // Backend URL (Change this to your Railway URL after deployment)
+        const BACKEND_URL = 'https://masaccc-production.up.railway.app';
+        let currentPin = '';
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function startScan() {
+            const pin = document.getElementById('pin-input').value.trim();
+            if (!pin.startsWith('MAK-') || pin.length < 15) {
+                showToast('INVALID KEY FORMAT');
+                return;
+            }
+
+            try {
+                const pcInfo = await getPcInfo();
+                const res = await axios.post(`${BACKEND_URL}/api/verify-pin`, { 
+                    pin: pin,
+                    hwid: pcInfo.hwid 
+                });
+                
+                if (!res.data.valid) {
+                    showToast(res.data.message || 'AUTH FAILED');
+                    return;
+                }
+            } catch (err) {
+                showToast('CONNECTION ERROR');
+                return;
+            }
+
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('scan-view').style.display = 'block';
+
+            await runScanner(pin);
+        }
+
+        async function getPcInfo() {
+            try {
+                const hwid = execSync('powershell (Get-WmiObject Win32_ComputerSystemProduct).UUID').toString().trim();
+                const os = execSync('powershell (Get-WmiObject Win32_OperatingSystem).Caption').toString().trim();
+                const user = process.env.USERNAME || 'Unknown';
+                return { os, user, hwid };
+            } catch (e) {
+                return { os: 'Windows 10 Pro', user: 'User', hwid: 'DEV-HWID-LOCAL' };
+            }
+        }
+
+        async function checkServices() {
+            const warnings = [];
+            try {
+                const msmpeng = execSync('powershell Get-Service WinDefend').toString();
+                if (!msmpeng.includes('Running')) warnings.push('Msmpeng not running');
+            } catch (e) {}
+            return warnings;
+        }
+
+        async function runScanner(pin) {
+            const logEl = document.getElementById('scan-log');
+            const progressCircle = document.getElementById('progress-circle');
+            const progressText = document.getElementById('progress-text');
+            const statusText = document.getElementById('status-text');
+
+            const foundFiles = [];
+            
+            // 1. Gather PC Info
+            statusText.innerText = "Gathering PC Information...";
+            const pcInfo = await getPcInfo();
+            const warnings = await checkServices();
+            
+            await new Promise(r => setTimeout(r, 500));
+
+            // 2. File Scan (Optimized for speed in this demo)
+            const scanRecursive = (dir, depth = 0) => {
+                if (depth > 4) return; 
+                try {
+                    const files = fs.readdirSync(dir);
+                    for (const file of files) {
+                        const fullPath = path.join(dir, file);
+                        const fileNameLower = file.toLowerCase();
+
+                        if (cheatNames.some(cheat => fileNameLower.includes(cheat.toLowerCase()))) {
+                            foundFiles.push(fullPath);
+                        }
+
+                        try {
+                            const stat = fs.statSync(fullPath);
+                            if (stat.isDirectory()) scanRecursive(fullPath, depth + 1);
+                        } catch (e) {}
+
+                        if (Math.random() > 0.99) {
+                            const line = document.createElement('div');
+                            line.className = 'scan-line';
+                            line.innerHTML = `Analyzing: <span>${file}</span>`;
+                            logEl.prepend(line);
+                        }
+                    }
+                } catch (e) {}
+            };
+
+            const criticalPaths = [
+                process.env.APPDATA,
+                process.env.LOCALAPPDATA,
+                path.join(process.env.USERPROFILE, 'Downloads'),
+                path.join(process.env.USERPROFILE, 'Desktop')
+            ];
+
+            for (let i = 0; i < criticalPaths.length; i++) {
+                const p = criticalPaths[i];
+                if (p && fs.existsSync(p)) {
+                    statusText.innerText = `Scanning: ${path.basename(p)}...`;
+                    scanRecursive(p, 0);
+                }
+                const percent = Math.floor(((i + 1) / criticalPaths.length) * 100);
+                progressText.innerText = `${percent}%`;
+                progressCircle.style.strokeDashoffset = 440 - (440 * percent / 100);
+                await new Promise(r => setTimeout(r, 200));
+            }
+
+            statusText.innerText = "Finalizing Report...";
+            await new Promise(r => setTimeout(r, 1000));
+
+            try {
+                const report = {
+                    pin: pin,
+                    status: (foundFiles.length > 0) ? 'Cheating' : 'Legit',
+                    details: `Found ${foundFiles.length} files.`,
+                    files: foundFiles,
+                    pcInfo: pcInfo
+                };
+                await axios.post(`${BACKEND_URL}/api/report`, report);
+                statusText.innerText = "AUDIT COMPLETE. YOU ARE SECURE WITH CXL AC.";
+            } catch (err) {
+                statusText.innerText = "Error: Failed to send data.";
+            }
+        }
+    </script>
+</body>
+</html>
