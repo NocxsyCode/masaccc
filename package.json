@@ -14,9 +14,17 @@
   "build": {
     "appId": "com.cxl.ac",
     "productName": "CXL AC",
+    "directories": {
+      "output": "dist"
+    },
     "win": {
-      "target": "portable"
-    }
+      "target": "portable",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "files": [
+      "app/**/*",
+      "package.json"
+    ]
   },
   "dependencies": {
     "axios": "^1.13.6",
